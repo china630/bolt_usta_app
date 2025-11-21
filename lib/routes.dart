@@ -1,53 +1,52 @@
 import 'package:flutter/material.dart';
-import 'models/order_model.dart';
+import 'package:on_demand_service_app/models/order_model.dart';
 
-// Экраны Auth
-import 'screens/main_router.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
-import 'screens/auth/role_selection_screen.dart';
+// --- Экраны ---
+import 'package:on_demand_service_app/screens/main_router.dart';
+import 'package:on_demand_service_app/screens/auth/login_screen.dart';
+import 'package:on_demand_service_app/screens/auth/register_screen.dart';
+import 'package:on_demand_service_app/screens/auth/role_selection_screen.dart';
 
-// Экраны Client
-import 'screens/client/client_home_screen.dart';
-import 'screens/client/client_order_creation_screen.dart';
-import 'screens/client/client_order_tracking_screen.dart';
-import 'screens/client/client_rating_screen.dart';
+import 'package:on_demand_service_app/screens/client/client_home_screen.dart';
+import 'package:on_demand_service_app/screens/client/client_order_creation_screen.dart';
+import 'package:on_demand_service_app/screens/client/client_order_tracking_screen.dart';
+import 'package:on_demand_service_app/screens/client/client_rating_screen.dart';
 
-// Экраны Master
-import 'screens/master/master_home_screen.dart';
-import 'screens/master/master_order_map_view_screen.dart';
-import 'screens/master/master_profile_editor_screen.dart';
-import 'screens/master/master_verification_screen.dart';
+import 'package:on_demand_service_app/screens/master/master_home_screen.dart';
+import 'package:on_demand_service_app/screens/master/master_order_map_view_screen.dart';
+import 'package:on_demand_service_app/screens/master/master_profile_editor_screen.dart';
+import 'package:on_demand_service_app/screens/master/master_verification_screen.dart';
 
-// Экран Chat
-import 'screens/chat/chat_screen.dart';
+import 'package:on_demand_service_app/screens/chat/chat_screen.dart';
 
 class Routes {
-  static const String initial = '/';
+  // Основные
+  static const String root = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String roleSelection = '/role_selection';
 
+  // Клиент
   static const String clientHome = '/client/home';
   static const String clientOrderCreation = '/client/create_order';
   static const String clientOrderTracking = '/client/tracking';
   static const String clientRating = '/client/rating';
 
+  // Мастер
   static const String masterHome = '/master/home';
-  static const String masterOrderMapView = '/master/map_view';
-  static const String masterProfileEditor = '/master/profile_editor';
   static const String masterVerification = '/master/verification';
+  static const String masterProfileEditor = '/master/profile';
+  static const String masterOrderMapView = '/master/map_view';
 
+  // Общие
   static const String chat = '/chat';
 }
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    final args = settings.arguments;
-
     switch (settings.name) {
     // --- Core ---
-      case Routes.initial:
+      case Routes.root:
         return MaterialPageRoute(builder: (_) => const MainRouter());
 
     // --- Auth ---
@@ -64,34 +63,37 @@ class AppRouter {
       case Routes.clientOrderCreation:
         return MaterialPageRoute(builder: (_) => const ClientOrderCreationScreen());
       case Routes.clientOrderTracking:
+        final args = settings.arguments;
         if (args is OrderModel) {
           return MaterialPageRoute(builder: (_) => ClientOrderTrackingScreen(initialOrder: args));
         }
-        return _errorRoute('OrderModel required for Tracking');
+        return _errorRoute('Ошибка: Неверный аргумент для трекинга');
       case Routes.clientRating:
+        final args = settings.arguments;
         if (args is OrderModel) {
           return MaterialPageRoute(builder: (_) => ClientRatingScreen(order: args));
         }
-        return _errorRoute('OrderModel required for Rating');
+        return _errorRoute('Ошибка: Неверный аргумент для оценки');
 
     // --- Master ---
       case Routes.masterHome:
         return MaterialPageRoute(builder: (_) => const MasterHomeScreen());
+      case Routes.masterVerification:
+        final isAwaiting = settings.arguments as bool? ?? false;
+        return MaterialPageRoute(builder: (_) => MasterVerificationScreen(isAwaiting: isAwaiting));
       case Routes.masterProfileEditor:
         return MaterialPageRoute(builder: (_) => const MasterProfileEditorScreen());
-      case Routes.masterVerification:
-      // Если передаем аргумент isAwaiting (bool), используем его, иначе false
-        final bool isAwaiting = (args is bool) ? args : false;
-        return MaterialPageRoute(builder: (_) => MasterVerificationScreen(isAwaiting: isAwaiting));
       case Routes.masterOrderMapView:
+        final args = settings.arguments;
         if (args is OrderModel) {
           return MaterialPageRoute(builder: (_) => MasterOrderMapViewScreen(initialOrder: args));
         }
-        return _errorRoute('OrderModel required for MapView');
+        return _errorRoute('Ошибка: Неверный аргумент для карты');
 
     // --- Chat ---
       case Routes.chat:
-        if (args is Map<String, dynamic>) {
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args != null && args.containsKey('orderId') && args.containsKey('otherUserName')) {
           return MaterialPageRoute(
             builder: (_) => ChatScreen(
               orderId: args['orderId'],
@@ -99,18 +101,21 @@ class AppRouter {
             ),
           );
         }
-        return _errorRoute('Invalid args for Chat');
+        return _errorRoute('Ошибка: Неверные аргументы для чата');
 
       default:
-        return _errorRoute('No route defined for ${settings.name}');
+        return _errorRoute('Маршрут не найден: ${settings.name}');
     }
   }
 
   static Route<dynamic> _errorRoute(String message) {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: Center(child: Text(message)),
+        appBar: AppBar(title: const Text('Ошибка Навигации'), backgroundColor: Colors.red),
+        body: Center(child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(message, textAlign: TextAlign.center),
+        )),
       ),
     );
   }
