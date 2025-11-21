@@ -42,6 +42,7 @@ dependencies:
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
   lottie: ^2.3.0
+  flutter_rating_bar: ^4.0.1
 
   # Пакеты для Geo-поиска
   rxdart: ^0.27.7

@@ -1,53 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:on_demand_service_app/models/order_model.dart';
+import 'models/order_model.dart';
 
-// --- Основные импорты экранов ---
-import 'package:on_demand_service_app/screens/main_router.dart'; // Главный роутер для проверки авторизации/роли
+// Экраны Auth
+import 'screens/main_router.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
+import 'screens/auth/role_selection_screen.dart';
 
-// Экраны Аутентификации
-import 'package:on_demand_service_app/screens/auth/login_screen.dart';
-import 'package:on_demand_service_app/screens/auth/register_screen.dart';
-import 'package:on_demand_service_app/screens/auth/role_selection_screen.dart'; // Экран выбора роли
+// Экраны Client
+import 'screens/client/client_home_screen.dart';
+import 'screens/client/client_order_creation_screen.dart';
+import 'screens/client/client_order_tracking_screen.dart';
+import 'screens/client/client_rating_screen.dart';
 
-// Экраны Клиента
-import 'package:on_demand_service_app/screens/client/client_home_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_order_creation_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_order_tracking_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_rating_screen.dart'; // Импорт экрана оценки
+// Экраны Master
+import 'screens/master/master_home_screen.dart';
+import 'screens/master/master_order_map_view_screen.dart';
+import 'screens/master/master_profile_editor_screen.dart';
+import 'screens/master/master_verification_screen.dart';
 
-// Экраны Мастера
-import 'package:on_demand_service_app/screens/master/master_home_screen.dart';
-import 'package:on_demand_service_app/screens/master/master_order_map_view_screen.dart';
-import 'package:on_demand_service_app/screens/master/master_profile_editor_screen.dart'; // Для верификации и заполнения профиля
+// Экран Chat
+import 'screens/chat/chat_screen.dart';
 
-/// Класс для хранения всех именованных маршрутов
 class Routes {
-  // Основные и Аутентификационные
-  static const String mainRouter = '/'; // Основной маршрут, который проверяет авторизацию
+  static const String initial = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String roleSelection = '/role_selection';
 
-  // Маршруты Клиента
-  static const String clientHome = '/client_home';
-  static const String clientOrderCreation = '/client_order_creation';
-  static const String clientOrderTracking = '/client_order_tracking';
-  static const String clientRating = '/client_rating';
+  static const String clientHome = '/client/home';
+  static const String clientOrderCreation = '/client/create_order';
+  static const String clientOrderTracking = '/client/tracking';
+  static const String clientRating = '/client/rating';
 
-  // Маршруты Мастера
-  static const String masterHome = '/master_home';
-  static const String masterOrderMapView = '/master_order_map_view';
-  static const String masterProfileEditor = '/master_profile_editor';
+  static const String masterHome = '/master/home';
+  static const String masterOrderMapView = '/master/map_view';
+  static const String masterProfileEditor = '/master/profile_editor';
+  static const String masterVerification = '/master/verification';
+
+  static const String chat = '/chat';
 }
 
-/// Класс для управления навигацией и генерацией маршрутов
 class AppRouter {
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    final args = settings.arguments;
+
     switch (settings.name) {
-    // --- Основные и Аутентификационные маршруты ---
-      case Routes.mainRouter:
-      // MainRouter теперь содержит логику перенаправления на home или roleSelection
+    // --- Core ---
+      case Routes.initial:
         return MaterialPageRoute(builder: (_) => const MainRouter());
+
+    // --- Auth ---
       case Routes.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case Routes.register:
@@ -55,68 +58,59 @@ class AppRouter {
       case Routes.roleSelection:
         return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
 
-    // --- Клиентские маршруты ---
+    // --- Client ---
       case Routes.clientHome:
         return MaterialPageRoute(builder: (_) => const ClientHomeScreen());
       case Routes.clientOrderCreation:
         return MaterialPageRoute(builder: (_) => const ClientOrderCreationScreen());
       case Routes.clientOrderTracking:
-      // Требует OrderModel в качестве аргумента.
-        final args = settings.arguments;
         if (args is OrderModel) {
-          return MaterialPageRoute(
-              builder: (_) => ClientOrderTrackingScreen(initialOrder: args));
+          return MaterialPageRoute(builder: (_) => ClientOrderTrackingScreen(initialOrder: args));
         }
-        return _errorRoute('Неверный аргумент для ClientOrderTrackingScreen');
-
+        return _errorRoute('OrderModel required for Tracking');
       case Routes.clientRating:
-      // Требует OrderModel в качестве аргумента.
-        final args = settings.arguments;
         if (args is OrderModel) {
-          return MaterialPageRoute(
-              builder: (_) => ClientRatingScreen(order: args));
+          return MaterialPageRoute(builder: (_) => ClientRatingScreen(order: args));
         }
-        return _errorRoute('Неверный аргумент для ClientRatingScreen');
+        return _errorRoute('OrderModel required for Rating');
 
-    // --- Мастерские маршруты ---
+    // --- Master ---
       case Routes.masterHome:
         return MaterialPageRoute(builder: (_) => const MasterHomeScreen());
-      case Routes.masterOrderMapView:
-      // Требует OrderModel в качестве аргумента.
-        final args = settings.arguments;
-        if (args is OrderModel) {
-          return MaterialPageRoute(
-              builder: (_) => MasterOrderMapViewScreen(initialOrder: args));
-        }
-        return _errorRoute('Неверный аргумент для MasterOrderMapViewScreen');
-
       case Routes.masterProfileEditor:
         return MaterialPageRoute(builder: (_) => const MasterProfileEditorScreen());
+      case Routes.masterVerification:
+      // Если передаем аргумент isAwaiting (bool), используем его, иначе false
+        final bool isAwaiting = (args is bool) ? args : false;
+        return MaterialPageRoute(builder: (_) => MasterVerificationScreen(isAwaiting: isAwaiting));
+      case Routes.masterOrderMapView:
+        if (args is OrderModel) {
+          return MaterialPageRoute(builder: (_) => MasterOrderMapViewScreen(initialOrder: args));
+        }
+        return _errorRoute('OrderModel required for MapView');
+
+    // --- Chat ---
+      case Routes.chat:
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              orderId: args['orderId'],
+              otherUserName: args['otherUserName'],
+            ),
+          );
+        }
+        return _errorRoute('Invalid args for Chat');
 
       default:
-      // Маршрут по умолчанию (ошибка)
-        return _errorRoute('Нет маршрута для: ${settings.name}');
+        return _errorRoute('No route defined for ${settings.name}');
     }
   }
 
-  /// Вспомогательная функция для создания маршрута ошибки
   static Route<dynamic> _errorRoute(String message) {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Ошибка Навигации'),
-          backgroundColor: Colors.red,
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, color: Colors.black54),
-            ),
-          ),
-        ),
+        appBar: AppBar(title: const Text('Error')),
+        body: Center(child: Text(message)),
       ),
     );
   }

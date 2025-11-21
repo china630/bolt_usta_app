@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // <-- Добавлен импорт
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 
 // Глобальные переменные, предоставляемые средой Canvas.
@@ -58,9 +58,7 @@ class UserService {
         return AppUser.fromFirestore(snapshot as DocumentSnapshot<Map<String, dynamic>>);
       }
 
-      // Если документа нет (например, только что зарегистрировались, но еще не выбрали роль),
-      // создаем базовый объект AppUser с ролью unknown.
-      // Используем текущего пользователя Firebase Auth для получения email.
+      // Если документа нет (новый пользователь), создаем базовый объект AppUser с ролью unknown
       final user = FirebaseAuth.instance.currentUser;
       return AppUser(
         uid: uid,
@@ -71,10 +69,9 @@ class UserService {
     });
   }
 
-  // --- НОВЫЙ МЕТОД: Обновление только роли пользователя ---
+  // --- 3. Обновление только роли пользователя ---
   Future<void> updateUserRole(String userId, UserRole newRole) async {
     final userRef = _userCollection(userId).doc('profile');
-    // Обновляем только поле 'role', используя .name для получения строкового значения enum
     await userRef.update({'role': newRole.name});
   }
 
@@ -105,11 +102,10 @@ class UserService {
       if (data != null && data.containsKey('displayName')) {
         return data['displayName'] as String;
       }
-      return 'Пользователь (ID: $userId)';
+      return 'Пользователь (ID: ${userId.substring(0, 4)}...)';
     } catch (e) {
-      print('Ошибка при получении имени пользователя $userId: $e');
+      print('Ошибка при получении displayName пользователя $userId: $e');
       return 'Ошибка загрузки имени';
     }
   }
-
 }
