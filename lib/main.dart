@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Импорт необходимых файлов
 import 'firebase_options.dart';
-import 'routers.dart';
 import 'routes.dart';
 
 void main() async {
@@ -61,7 +60,7 @@ class MyApp extends StatelessWidget {
           // 2. Если пользователь не авторизован (null), показываем экран аутентификации
           if (!snapshot.hasData || snapshot.data == null) {
             // Перенаправляем на заглушку AuthScreen, которая в реальном приложении будет экраном Входа/Регистрации
-            return const AuthScreen(); // Это заглушка из app_router.dart
+            return AuthScreen(); // Это заглушка из app_router.dart
           }
 
           // 3. Пользователь авторизован (snapshot.data - это User)

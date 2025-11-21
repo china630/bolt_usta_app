@@ -49,6 +49,7 @@ dependencies:
   geolocator: ^11.0.0
   flutter_map: ^6.1.0
   latlong2: ^0.9.1
+  google_maps_flutter: ^2.14.0
 
   # Пакеты для работы с файлами и камерой
   image_picker: ^1.0.4
