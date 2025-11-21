@@ -1,11 +1,11 @@
 import 'dart:async'; // Импортируем для StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:on_demand_service_app/models/order_model.dart';
-import 'package:on_demand_service_app/models/user_model.dart';
-import 'package:on_demand_service_app/services/order_service.dart';
-import 'package:on_demand_service_app/services/user_service.dart';
-import 'package:on_demand_service_app/routes.dart';
+import 'package:bolt_usta_app/models/order_model.dart';
+import 'package:bolt_usta_app/models/user_model.dart';
+import 'package:bolt_usta_app/services/order_service.dart';
+import 'package:bolt_usta_app/services/user_service.dart';
+import 'package:bolt_usta_app/routes.dart';
 
 // Инициализация сервисов
 final OrderService _orderService = OrderService();

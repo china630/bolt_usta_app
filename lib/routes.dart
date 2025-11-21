@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:on_demand_service_app/models/order_model.dart';
+import 'package:bolt_usta_app/models/order_model.dart';
 
 // --- Экраны ---
-import 'package:on_demand_service_app/screens/main_router.dart';
-import 'package:on_demand_service_app/screens/auth/login_screen.dart';
-import 'package:on_demand_service_app/screens/auth/register_screen.dart';
-import 'package:on_demand_service_app/screens/auth/role_selection_screen.dart';
+import 'package:bolt_usta_app/screens/main_router.dart';
+import 'package:bolt_usta_app/screens/auth/login_screen.dart';
+import 'package:bolt_usta_app/screens/auth/register_screen.dart';
+import 'package:bolt_usta_app/screens/auth/role_selection_screen.dart';
 
-import 'package:on_demand_service_app/screens/client/client_home_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_order_creation_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_order_tracking_screen.dart';
-import 'package:on_demand_service_app/screens/client/client_rating_screen.dart';
+import 'package:bolt_usta_app/screens/client/client_home_screen.dart';
+import 'package:bolt_usta_app/screens/client/client_order_creation_screen.dart';
+import 'package:bolt_usta_app/screens/client/client_order_tracking_screen.dart';
+import 'package:bolt_usta_app/screens/client/client_rating_screen.dart';
 
-import 'package:on_demand_service_app/screens/master/master_home_screen.dart';
-import 'package:on_demand_service_app/screens/master/master_order_map_view_screen.dart';
-import 'package:on_demand_service_app/screens/master/master_profile_editor_screen.dart';
-import 'package:on_demand_service_app/screens/master/master_verification_screen.dart';
+import 'package:bolt_usta_app/screens/master/master_home_screen.dart';
+import 'package:bolt_usta_app/screens/master/master_order_map_view_screen.dart';
+import 'package:bolt_usta_app/screens/master/master_profile_editor_screen.dart';
+import 'package:bolt_usta_app/screens/master/master_verification_screen.dart';
 
-import 'package:on_demand_service_app/screens/chat/chat_screen.dart';
+import 'package:bolt_usta_app/screens/chat/chat_screen.dart';
 
 class Routes {
   // Основные

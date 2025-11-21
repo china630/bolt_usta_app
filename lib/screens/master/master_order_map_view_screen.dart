@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:on_demand_service_app/models/order_model.dart';
-import 'package:on_demand_service_app/services/location_service.dart';
-import 'package:on_demand_service_app/services/order_service.dart';
-import 'package:on_demand_service_app/services/user_service.dart';
-import 'package:on_demand_service_app/routes.dart';
+import 'package:bolt_usta_app/models/order_model.dart';
+import 'package:bolt_usta_app/services/location_service.dart';
+import 'package:bolt_usta_app/services/order_service.dart';
+import 'package:bolt_usta_app/services/user_service.dart';
+import 'package:bolt_usta_app/routes.dart';
 
 // Инициализация сервисов
 final OrderService _orderService = OrderService();
