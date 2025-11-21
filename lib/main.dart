@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // Импорт необходимых файлов
 import 'firebase_options.dart';
-import 'app_router.dart';
+import 'routers.dart';
 import 'routes.dart';
 
 void main() async {
