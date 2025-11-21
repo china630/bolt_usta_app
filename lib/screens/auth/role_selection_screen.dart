@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Оставляем, если другие части кода его используют
-
-import '../../services/user_service.dart'; // Импортируем сервис
-import '../../models/user_model.dart'; // Импортируем модель для UserRole
-
-// Создаем экземпляр сервиса
-final UserService _userService = UserService();
-
-// Импортируем экраны, на которые будем перенаправлять
+import 'package:on_demand_service_app/services/user_service.dart';
+import 'package:on_demand_service_app/models/user_model.dart';
 import 'package:on_demand_service_app/routes.dart';
+
+// Инициализируем UserService
+final UserService _userService = UserService();
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -25,7 +21,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   // Функция для сохранения роли в Firestore и перенаправления
   Future<void> _selectRole(UserRole role) async {
     if (user == null) {
-      // Если пользователя нет, перенаправляем на вход
+      // Если пользователя нет (не должен случиться на этом этапе), возвращаемся на логин
       Navigator.of(context).pushReplacementNamed(Routes.login);
       return;
     }
@@ -35,21 +31,22 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     });
 
     try {
-      // ИСПОЛЬЗУЕМ UserService для обновления роли
-      await _userService.updateUserRole(user!.uid, role);
+      // ИСПОЛЬЗУЕМ СЕРВИС: Обновляем роль в Firestore по безопасному пути
+      await _userService.updateUserRole(
+        user!.uid,
+        newRole: role,
+      );
 
-      // Перенаправление в зависимости от роли
-      if (role == UserRole.client) {
-        Navigator.of(context).pushReplacementNamed(Routes.clientHome);
-      } else if (role == UserRole.master) {
-        // Мастер должен пройти верификацию перед использованием
-        Navigator.of(context).pushReplacementNamed(Routes.masterVerification);
-      }
+      // Перенаправление (MainRouter перехватит и отправит на Home или Editor)
+      // Возвращаемся к MainRouter, чтобы он заново проверил роль и выполнил pushReplacement
+      Navigator.of(context).pushNamedAndRemoveUntil(Routes.mainRouter, (route) => false);
+
     } catch (e) {
+      // Здесь можно показать диалог ошибки
+      print('Ошибка при выборе роли: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ошибка при выборе роли: $e')),
       );
-      print('Ошибка при выборе роли: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -66,46 +63,41 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     required UserRole role,
     required Color color,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: InkWell(
-          onTap: _isLoading ? null : () => _selectRole(role),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                Icon(icon, size: 40, color: color),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
+    return Card(
+      elevation: 5,
+      margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: _isLoading ? null : () => _selectRole(role),
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 40, color: color),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: color.shade800,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      description,
+                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                  ],
                 ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
-              ],
-            ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
           ),
         ),
       ),
@@ -116,8 +108,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Выберите Роль'),
-        automaticallyImplyLeading: false, // Не позволяем вернуться назад после регистрации
+        title: const Text('Выбор Роли'),
+        automaticallyImplyLeading: false, // Отключаем кнопку "Назад"
         backgroundColor: Colors.blueAccent,
       ),
       body: Center(
@@ -126,14 +118,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
+            children: <Widget>[
+              Text(
                 'Добро пожаловать!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: Colors.blueAccent,
+                  color: Colors.teal.shade700,
                 ),
               ),
               const SizedBox(height: 10),
@@ -161,7 +153,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 title: 'Я Мастер',
                 description: 'Я хочу предоставлять услуги и принимать заказы от клиентов.',
                 icon: Icons.handyman,
-                role: UserRole.master, // Устанавливаем роль Master
+                role: UserRole.master,
                 color: Colors.indigo,
               ),
 
